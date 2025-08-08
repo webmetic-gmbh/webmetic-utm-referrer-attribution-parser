@@ -62,6 +62,12 @@ Thumbs.db
 utm_referrer_parser/data/cache_metadata.json
 utm_referrer_parser/data/referers.yaml.tmp
 utm_referrer_parser/data/referers.json.tmp
-
+*.claude
+*.ruff
+*.mypy
 # Temporary files
 *.tmp
+
+# Development directories (excluded from commits)
+django-utm-tracker-master/
+python-referer-parser-develop/

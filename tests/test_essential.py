@@ -21,7 +21,8 @@ class TestCoreAttribution:
         assert result['source'] == 'google'
         assert result['medium'] == 'cpc'
         assert result['campaign'] == 'winter_sale'
-        assert result['gclid'] == 'CjwKCAiA'
+        assert result['click_id'] == 'CjwKCAiA'
+        assert result['click_id_type'] == 'gclid'
 
     def test_facebook_ad_attribution(self):
         """Test Facebook ad click attribution."""
@@ -32,7 +33,8 @@ class TestCoreAttribution:
         
         assert result['source'] == 'facebook'
         assert result['medium'] == 'cpc'
-        assert result['fbclid'] == 'IwAR1234567890'
+        assert result['click_id'] == 'IwAR1234567890'
+        assert result['click_id_type'] == 'fbclid'
 
     def test_organic_search_with_term(self):
         """Test organic search with search term extraction."""
@@ -70,9 +72,9 @@ class TestCoreAttribution:
             url="https://mysite.com/?gclid=google123&fbclid=facebook456"
         )
         
-        assert result['gclid'] == 'google123'
-        assert result['fbclid'] == 'facebook456'
-        # Google should take priority in attribution
+        # Google should take priority (first in CLICK_ID_PARAMETERS)
+        assert result['click_id'] == 'google123'
+        assert result['click_id_type'] == 'gclid'
         assert result['source'] == 'google'
         assert result['medium'] == 'cpc'
 
@@ -99,27 +101,32 @@ class TestTrackingParameters:
             "https://site.com/?gclid=abc&gclsrc=aw&gbraid=def&wbraid=ghi&gad_source=jkl"
         )
         
-        assert result['gclid'] == 'abc'
+        # gclid should be in unified click_id field
+        assert result['click_id'] == 'abc'
+        assert result['click_id_type'] == 'gclid'
+        # Other Google parameters should remain separate
         assert result['gclsrc'] == 'aw'
-        assert result['gbraid'] == 'def'
-        assert result['wbraid'] == 'ghi'
         assert result['gad_source'] == 'jkl'
+        # gbraid and wbraid are also click IDs, but gclid has priority
 
     def test_social_media_parameters(self):
         """Test social media platform parameters."""
         # Facebook
         result = webmetic_referrer("https://site.com/?fbclid=fb123")
-        assert result['fbclid'] == 'fb123'
+        assert result['click_id'] == 'fb123'
+        assert result['click_id_type'] == 'fbclid'
         assert result['source'] == 'facebook'
         
         # Twitter (ttclid maps to Twitter in current implementation)
         result = webmetic_referrer("https://site.com/?ttclid=tt123")
-        assert result['ttclid'] == 'tt123'
+        assert result['click_id'] == 'tt123'
+        assert result['click_id_type'] == 'ttclid'
         assert result['source'] == 'twitter'
         
         # LinkedIn
         result = webmetic_referrer("https://site.com/?li_fat_id=li123")
-        assert result['li_fat_id'] == 'li123'
+        assert result['click_id'] == 'li123'
+        assert result['click_id_type'] == 'li_fat_id'
         assert result['source'] == 'linkedin'
 
     def test_email_marketing_parameters(self):
@@ -134,7 +141,8 @@ class TestTrackingParameters:
     def test_microsoft_parameters(self):
         """Test Microsoft/Bing Ads parameters."""
         result = webmetic_referrer("https://site.com/?msclkid=bing123")
-        assert result['msclkid'] == 'bing123'
+        assert result['click_id'] == 'bing123'
+        assert result['click_id_type'] == 'msclkid'
         assert result['source'] == 'bing'
         assert result['medium'] == 'cpc'
 
@@ -304,4 +312,5 @@ class TestRealWorldScenarios:
         # UTM should take priority
         assert result['source'] == 'instagram'
         assert result['medium'] == 'social'
-        assert result['fbclid'] == 'IwAR123'  # But click ID still preserved
+        assert result['click_id'] == 'IwAR123'  # Click ID still preserved
+        assert result['click_id_type'] == 'fbclid'

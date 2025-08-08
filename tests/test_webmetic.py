@@ -19,7 +19,8 @@ class TestWebmeticReferrer:
         assert result['campaign'] == 'winter'
         assert result['term'] == 'shoes'
         assert result['content'] == 'ad1'
-        assert result['gclid'] == 'abc123'
+        assert result['click_id'] == 'abc123'
+        assert result['click_id_type'] == 'gclid'
         assert result['utm_source'] == 'google'
         assert result['utm_medium'] == 'cpc'
     
@@ -32,7 +33,8 @@ class TestWebmeticReferrer:
         
         assert result['source'] == 'facebook'
         assert result['medium'] == 'cpc'
-        assert result['fbclid'] == 'IwAR123456'
+        assert result['click_id'] == 'IwAR123456'
+        assert result['click_id_type'] == 'fbclid'
         # Should not have UTM parameters
         assert 'utm_source' not in result
         assert 'campaign' not in result or result['campaign'] is None
@@ -69,10 +71,9 @@ class TestWebmeticReferrer:
             url="https://site.com/?gclid=google123&fbclid=fb456&ttclid=tiktok789"
         )
         
-        # Should detect all click IDs
-        assert result['gclid'] == 'google123'
-        assert result['fbclid'] == 'fb456'
-        assert result['ttclid'] == 'tiktok789'
+        # Should use first click ID found (Google has priority)
+        assert result['click_id'] == 'google123'
+        assert result['click_id_type'] == 'gclid'
         
         # Google should take priority in attribution
         assert result['source'] == 'google'
@@ -89,22 +90,31 @@ class TestWebmeticReferrer:
         assert result['medium'] == 'email'
         
         # But should still include the click ID
-        assert result['gclid'] == 'abc123'
+        assert result['click_id'] == 'abc123'
+        assert result['click_id_type'] == 'gclid'
     
     def test_social_media_platforms(self):
         """Test various social media click IDs."""
         test_cases = [
-            ("https://site.com/?ttclid=tiktok123", "twitter", "cpc", "ttclid"),
-            ("https://site.com/?twclid=twitter456", "twitter", "cpc", "twclid"),
-            ("https://site.com/?li_fat_id=linkedin789", "linkedin", "cpc", "li_fat_id"),
-            ("https://site.com/?igshid=instagram123", "instagram", "social", "igshid"),
+            ("https://site.com/?ttclid=tiktok123", "twitter", "cpc", "ttclid", "tiktok123"),
+            ("https://site.com/?twclid=twitter456", "twitter", "cpc", "twclid", "twitter456"),
+            ("https://site.com/?li_fat_id=linkedin789", "linkedin", "cpc", "li_fat_id", "linkedin789"),
+            # Note: igshid is not a click ID, so it won't be in click_id field
+            ("https://site.com/?igshid=instagram123", "instagram", "social", None, None),
         ]
         
-        for url, expected_source, expected_medium, click_id_key in test_cases:
+        for url, expected_source, expected_medium, expected_click_id_type, expected_click_id in test_cases:
             result = webmetic_referrer(url)
             assert result['source'] == expected_source
             assert result['medium'] == expected_medium
-            assert click_id_key in result
+            if expected_click_id_type:
+                assert result['click_id_type'] == expected_click_id_type
+                assert result['click_id'] == expected_click_id
+            else:
+                # Instagram share ID should still be in result as separate field
+                assert result.get('click_id') is None
+                assert result.get('click_id_type') is None
+                assert 'igshid' in result
     
     def test_email_marketing(self):
         """Test email marketing parameters."""
@@ -116,6 +126,9 @@ class TestWebmeticReferrer:
         assert result['medium'] == 'email'
         assert result['mc_cid'] == 'campaign123'
         assert result['mc_eid'] == 'email456'
+        # Email marketing parameters are not click IDs
+        assert result.get('click_id') is None
+        assert result.get('click_id_type') is None
     
     def test_microsoft_ads(self):
         """Test Microsoft/Bing ads."""
@@ -125,7 +138,8 @@ class TestWebmeticReferrer:
         
         assert result['source'] == 'bing'
         assert result['medium'] == 'cpc'
-        assert result['msclkid'] == 'microsoft123'
+        assert result['click_id'] == 'microsoft123'
+        assert result['click_id_type'] == 'msclkid'
     
     def test_all_utm_parameters(self):
         """Test that all UTM parameters are included."""
@@ -188,7 +202,8 @@ class TestWebmeticReferrer:
         )
         
         # Should preserve original case for click IDs
-        assert result['gclid'] == 'CjwKCAiA_Base64_String'
+        assert result['click_id'] == 'CjwKCAiA_Base64_String'
+        assert result['click_id_type'] == 'gclid'
     
     def test_priority_order(self):
         """Test attribution priority order."""
@@ -199,7 +214,8 @@ class TestWebmeticReferrer:
         
         assert result['source'] == 'newsletter'  # UTM takes priority
         assert result['medium'] == 'email'       # UTM takes priority
-        assert result['fbclid'] == 'fb123'       # But click ID is still included
+        assert result['click_id'] == 'fb123'     # Click ID is still included
+        assert result['click_id_type'] == 'fbclid'
     
     def test_referrer_fallback(self):
         """Test fallback to referrer analysis when no URL parameters."""

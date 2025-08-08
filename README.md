@@ -17,7 +17,8 @@ print(result)
 # {
 #     'source': 'google',
 #     'medium': 'cpc',
-#     'gclid': 'abc123',
+#     'click_id': 'abc123',
+#     'click_id_type': 'gclid',
 #     'term': 'analytics'
 # }
 ```
@@ -25,6 +26,7 @@ print(result)
 ## 🚀 Features
 
 - **Ultra-Simple API**: Just `webmetic_referrer(url, referrer)` - that's it!
+- **Unified Click Tracking**: Clean `click_id` and `click_id_type` fields instead of 15+ individual parameters
 - **25+ Tracking Parameters**: UTM, Google Ads, Facebook, TikTok, LinkedIn, email platforms, and more
 - **Smart Referrer Analysis**: Uses Snowplow's referrer database for accurate source/medium classification
 - **Auto-updating Database**: Weekly updates of referrer database with local fallback
@@ -46,7 +48,7 @@ pip install utm-referrer-attribution-parser
 result = webmetic_referrer(
     url="https://site.com/landing?utm_source=google&utm_medium=cpc&gclid=abc123"
 )
-# Returns: {'source': 'google', 'medium': 'cpc', 'gclid': 'abc123'}
+# Returns: {'source': 'google', 'medium': 'cpc', 'click_id': 'abc123', 'click_id_type': 'gclid'}
 ```
 
 ### Facebook Ad
@@ -55,7 +57,7 @@ result = webmetic_referrer(
     url="https://site.com/product?fbclid=fb123",
     referrer="https://www.facebook.com/"
 )
-# Returns: {'source': 'facebook', 'medium': 'cpc', 'fbclid': 'fb123'}
+# Returns: {'source': 'facebook', 'medium': 'cpc', 'click_id': 'fb123', 'click_id_type': 'fbclid'}
 ```
 
 ### Organic Search
@@ -73,25 +75,58 @@ result = webmetic_referrer("https://site.com/")
 # Returns: {'source': '(direct)', 'medium': '(none)'}
 ```
 
+## 🎯 Unified Click Tracking
+
+Instead of tracking 15+ individual click ID fields, we provide a clean unified structure:
+
+### Old Approach (Complex)
+```python
+# Multiple individual fields to check
+result = {
+    'gclid': 'abc123',
+    'fbclid': None,
+    'ttclid': None,
+    'msclkid': None,
+    # ... 15+ more fields
+}
+```
+
+### New Approach (Clean)
+```python
+# Just 2 unified fields
+result = {
+    'click_id': 'abc123',        # The actual tracking value
+    'click_id_type': 'gclid'     # Which parameter it came from
+}
+```
+
+### Benefits
+- **Cleaner API**: 2 fields instead of 15+
+- **Easier Logic**: Simple `if result['click_id']` checks
+- **Platform Detection**: Still get source/medium attribution automatically
+- **Priority Handling**: Google Ads → Facebook → Microsoft → Other platforms
+
 ## Supported Parameters
 
 ### Standard UTM
 - `utm_source`, `utm_medium`, `utm_campaign`, `utm_term`, `utm_content`, `utm_id`
 
-### Google Ads  
-- `gclid`, `gclsrc`, `gbraid`, `wbraid`, `gad_source`, `srsltid`
+### Click Tracking (Unified)
+- `click_id` - The actual click tracking value
+- `click_id_type` - Which parameter provided it (`gclid`, `fbclid`, `ttclid`, etc.)
+
+### Google Ads Metadata
+- `gclsrc`, `gad_source`, `srsltid`
 
 ### Social Media
-- `fbclid` (Facebook), `ttclid` (TikTok), `twclid` (Twitter)
-- `li_fat_id` (LinkedIn), `igshid` (Instagram), `ScCid` (Snapchat)
+- `igshid` (Instagram), `sccid` (Snapchat)
 
 ### Email Marketing
 - `mc_cid`, `mc_eid` (Mailchimp)
 - `ml_subscriber_hash` (MailerLite)
 
-### Other Platforms
-- `msclkid` (Microsoft), `dclid` (DoubleClick), `yclid` (Yahoo)
-- `epik` (Pinterest), `rdt_cid` (Reddit), and more
+### Other Platform Parameters
+- `epik` (Pinterest), `ttd_uuid` (Trade Desk), `obOrigUrl` (Outbrain), and more
 
 ## 🧪 Validation & Testing
 
@@ -131,6 +166,7 @@ result = webmetic_referrer(
 ## 📊 What Makes This Different
 
 - **Intelligent Priority**: UTM parameters → Click IDs → Referrer analysis → Direct traffic
+- **Unified Click Tracking**: Clean `click_id`/`click_id_type` structure instead of 15+ individual fields
 - **Click ID Detection**: Automatically identifies 25+ types of advertising click IDs
 - **International Ready**: Built-in support for global search engines and platforms  
 - **Real-world Tested**: Validated against actual production analytics data
