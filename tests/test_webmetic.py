@@ -228,3 +228,180 @@ class TestWebmeticReferrer:
         assert result['source'] == 'google'
         assert result['medium'] == 'organic'
         assert result['term'] == 'python tutorial'
+    
+    def test_internal_navigation_same_domain(self):
+        """Test internal navigation with same domain."""
+        result = webmetic_referrer(
+            url="https://example.com/page2",
+            referrer="https://example.com/page1"
+        )
+        
+        assert result['source'] == '(internal)'
+        assert result['medium'] == 'internal'
+    
+    def test_internal_navigation_subdomain_to_root(self):
+        """Test internal navigation from subdomain to root domain."""
+        result = webmetic_referrer(
+            url="https://acme-corp.com/products",
+            referrer="https://shop.acme-corp.com/checkout"
+        )
+        
+        assert result['source'] == '(internal)'
+        assert result['medium'] == 'internal'
+    
+    def test_internal_navigation_root_to_subdomain(self):
+        """Test internal navigation from root domain to subdomain."""
+        result = webmetic_referrer(
+            url="https://api.acme-corp.com/docs", 
+            referrer="https://acme-corp.com/"
+        )
+        
+        assert result['source'] == '(internal)'
+        assert result['medium'] == 'internal'
+    
+    def test_internal_navigation_subdomain_to_subdomain(self):
+        """Test internal navigation between different subdomains."""
+        result = webmetic_referrer(
+            url="https://shop.example.com/products",
+            referrer="https://blog.example.com/article"
+        )
+        
+        assert result['source'] == '(internal)'
+        assert result['medium'] == 'internal'
+    
+    def test_internal_navigation_www_variants(self):
+        """Test internal navigation with www variants."""
+        result = webmetic_referrer(
+            url="https://www.example.com/page2",
+            referrer="https://example.com/page1"  
+        )
+        
+        assert result['source'] == '(internal)'
+        assert result['medium'] == 'internal'
+    
+    def test_internal_navigation_complex_subdomains(self):
+        """Test internal navigation with complex subdomain structure."""
+        result = webmetic_referrer(
+            url="https://api.v2.example.com/docs",
+            referrer="https://dashboard.admin.example.com/settings"
+        )
+        
+        assert result['source'] == '(internal)'
+        assert result['medium'] == 'internal'
+    
+    def test_external_referral_different_domains(self):
+        """Test external referral from different domain."""
+        result = webmetic_referrer(
+            url="https://example.com/page",
+            referrer="https://otherdomain.com/link"
+        )
+        
+        # Should be external referral, not internal
+        assert result['source'] == 'otherdomain.com'
+        assert result['medium'] == 'referral'
+    
+    def test_internal_navigation_with_utm_override(self):
+        """Test that UTM parameters override internal navigation detection."""
+        result = webmetic_referrer(
+            url="https://acme-corp.com/page?utm_source=newsletter&utm_medium=email",
+            referrer="https://shop.acme-corp.com/"
+        )
+        
+        # UTM parameters should take priority over internal detection
+        assert result['source'] == 'newsletter' 
+        assert result['medium'] == 'email'
+    
+    def test_internal_navigation_two_part_tlds(self):
+        """Test internal navigation with 2-part TLDs like co.uk."""
+        result = webmetic_referrer(
+            url="https://shop.example.co.uk/products",
+            referrer="https://www.example.co.uk/"
+        )
+        
+        assert result['source'] == '(internal)'
+        assert result['medium'] == 'internal'
+    
+    def test_external_referral_different_domains_co_uk(self):
+        """Test external referral between different co.uk domains."""
+        result = webmetic_referrer(
+            url="https://example.co.uk/page",
+            referrer="https://other.co.uk/link"
+        )
+        
+        # Should be external referral, not internal
+        assert result['source'] == 'other.co.uk'
+        assert result['medium'] == 'referral'
+    
+    def test_internal_navigation_case_insensitive(self):
+        """Test that domain comparison is case insensitive."""
+        result = webmetic_referrer(
+            url="https://Example.COM/page2",
+            referrer="https://www.EXAMPLE.com/page1"
+        )
+        
+        assert result['source'] == '(internal)'
+        assert result['medium'] == 'internal'
+    
+    def test_internal_navigation_complex_tlds(self):
+        """Test internal navigation with complex TLDs using tldextract."""
+        test_cases = [
+            # Australian domains
+            ("https://shop.example.com.au/products", "https://example.com.au/"),
+            # Japanese domains  
+            ("https://blog.mysite.co.jp/article", "https://mysite.co.jp/"),
+            # Brazilian domains
+            ("https://api.test.org.br/docs", "https://test.org.br/"),
+            # Indian domains
+            ("https://cdn.company.co.in/assets", "https://company.co.in/"),
+        ]
+        
+        for url, referrer in test_cases:
+            result = webmetic_referrer(url=url, referrer=referrer)
+            assert result['source'] == '(internal)', f"Failed for {url} <- {referrer}"
+            assert result['medium'] == 'internal', f"Failed for {url} <- {referrer}"
+    
+    def test_tldextract_edge_cases(self):
+        """Test edge cases that would fail without proper TLD extraction."""
+        test_cases = [
+            # Multi-level subdomains with complex TLDs
+            ("https://deep.nested.example.edu.au/page", "https://example.edu.au/", "Australian education domain"),
+            ("https://www.subdomain.company.gov.br/api", "https://company.gov.br/", "Brazilian government domain"),
+            ("https://cdn.assets.mysite.ac.uk/images", "https://mysite.ac.uk/", "UK academic domain"),
+            ("https://blog.news.site.net.au/article", "https://site.net.au/", "Australian network domain"),
+            ("https://api.v2.service.co.za/data", "https://service.co.za/", "South African domain"),
+            # Edge case: very deep nesting
+            ("https://a.b.c.d.e.example.co.uk/deep", "https://example.co.uk/", "Very deep subdomain nesting"),
+        ]
+        
+        for url, referrer, description in test_cases:
+            result = webmetic_referrer(url=url, referrer=referrer)
+            assert result['source'] == '(internal)', f"Failed for {description}: {url} <- {referrer}"
+            assert result['medium'] == 'internal', f"Failed for {description}: {url} <- {referrer}"
+    
+    def test_tldextract_vs_external_domains(self):
+        """Test that different root domains are correctly identified as external."""
+        test_cases = [
+            # Different domains with same TLD
+            ("https://example.com.au/page", "https://other.com.au/link", "Different .com.au domains"),
+            ("https://site.co.uk/page", "https://different.co.uk/ref", "Different .co.uk domains"),
+            ("https://company.org.br/page", "https://another.org.br/link", "Different .org.br domains"),
+        ]
+        
+        for url, referrer, description in test_cases:
+            result = webmetic_referrer(url=url, referrer=referrer)
+            assert result['source'] != '(internal)', f"Should be external for {description}: {url} <- {referrer}"
+            assert result['medium'] != 'internal', f"Should be external for {description}: {url} <- {referrer}"
+    
+    def test_tldextract_fallback_behavior(self):
+        """Test graceful fallback if tldextract has issues."""
+        # Test with malformed or edge case domains
+        test_cases = [
+            ("https://localhost:8000/page", "https://localhost:8000/ref", "localhost should work"),
+            ("https://example/page", "https://example/ref", "Single word domains"),
+        ]
+        
+        for url, referrer, description in test_cases:
+            # Should not crash and should handle gracefully
+            result = webmetic_referrer(url=url, referrer=referrer)
+            assert 'source' in result, f"Should return valid result for {description}"
+            assert 'medium' in result, f"Should return valid result for {description}"

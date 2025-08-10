@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "utm-referrer-attribution-parser"
-version = "0.1.1"
+version = "0.1.2"
 description = "Modern Python library combining referrer parsing with tracking parameter extraction for web analytics"
 readme = "README.md"
 license = "MIT"
@@ -29,6 +29,7 @@ classifiers = [
 dependencies = [
     "PyYAML>=6.0",
     "requests>=2.25.0",
+    "tldextract>=3.1.0",
 ]
 
 [project.optional-dependencies]

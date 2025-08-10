@@ -79,13 +79,18 @@ class ReferrerParser:
             if not ref_host or ref_uri.scheme not in {'http', 'https'}:
                 return result
 
-            # Check for internal referrer
+            # Check for internal referrer using root domain comparison
             if current_url:
                 curr_uri = urlparse(current_url)
-                if curr_uri.hostname == ref_host:
-                    result['source'] = '(internal)'
-                    result['medium'] = 'internal'
-                    return result
+                if curr_uri.hostname:
+                    ref_root = self._get_root_domain(ref_host)
+                    curr_root = self._get_root_domain(curr_uri.hostname)
+                    if ref_root and curr_root and ref_root == curr_root:
+                        result['source'] = '(internal)'
+                        result['medium'] = 'internal'
+                        # Cache the result before returning
+                        cache.put_parse_result(cache_key, result)
+                        return result
 
             # Look up referrer in database
             referrer_info = self._lookup_referrer(ref_host, ref_uri.path)
@@ -132,16 +137,73 @@ class ReferrerParser:
                 if variant in self._referrers_index:
                     return self._referrers_index[variant]
 
-        # Try subdomain fallback (remove first subdomain)
+        # Try intelligent subdomain fallback using tldextract
         if '.' in hostname:
             try:
+                # Use tldextract for more intelligent domain parsing
+                import tldextract
+                extracted = tldextract.extract(hostname.lower())
+                
+                if extracted.domain and extracted.suffix:
+                    # Try root domain (e.g., google.co.uk)
+                    root_domain = f"{extracted.domain}.{extracted.suffix}"
+                    if root_domain != hostname:
+                        result = self._lookup_referrer(root_domain, path)
+                        if result:
+                            return result
+                
+                # Fallback to old recursive logic if tldextract fails
                 idx = hostname.index('.')
                 parent_domain = hostname[idx + 1:]
                 return self._lookup_referrer(parent_domain, path)
-            except ValueError:
-                pass
+                
+            except (ImportError, ValueError):
+                # Fallback to old recursive logic
+                try:
+                    idx = hostname.index('.')
+                    parent_domain = hostname[idx + 1:]
+                    return self._lookup_referrer(parent_domain, path)
+                except ValueError:
+                    pass
 
         return None
+
+    def _get_root_domain(self, hostname: str) -> Optional[str]:
+        """
+        Extract root domain from hostname for internal referrer detection.
+        
+        Uses tldextract to properly handle all TLDs including complex cases
+        like .co.uk, .com.au, etc.
+        
+        Examples:
+            - acme-corp.de -> acme-corp.de
+            - shop.acme-corp.de -> acme-corp.de  
+            - www.example.com -> example.com
+            - subdomain.test.example.co.uk -> example.co.uk
+        """
+        if not hostname:
+            return None
+            
+        try:
+            import tldextract
+            
+            # Extract domain parts using tldextract
+            extracted = tldextract.extract(hostname.lower())
+            
+            # Return domain + suffix (e.g., "example" + "co.uk" = "example.co.uk")
+            if extracted.domain and extracted.suffix:
+                return f"{extracted.domain}.{extracted.suffix}"
+            elif extracted.domain:
+                # Fallback for cases where suffix detection fails
+                return extracted.domain
+            else:
+                return None
+                
+        except ImportError:
+            # Fallback to simple logic if tldextract is not available
+            # This should not happen since tldextract is now a dependency
+            parts = hostname.lower().split('.')
+            return '.'.join(parts[-2:]) if len(parts) >= 2 else hostname
 
     def _extract_search_term(self, query_string: str, parameters: List[str]) -> Optional[str]:
         """Extract search term from query string using known parameters."""

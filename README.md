@@ -29,6 +29,7 @@ print(result)
 - **Unified Click Tracking**: Clean `click_id` and `click_id_type` fields instead of 15+ individual parameters
 - **25+ Tracking Parameters**: UTM, Google Ads, Facebook, TikTok, LinkedIn, email platforms, and more
 - **Smart Referrer Analysis**: Uses Snowplow's referrer database for accurate source/medium classification
+- **Advanced Domain Parsing**: Uses tldextract for robust international domain handling (.co.uk, .com.au, etc.)
 - **Auto-updating Database**: Weekly updates of referrer database with local fallback
 - **High Performance**: In-memory caching and optimized parsing
 - **Framework Agnostic**: Works with any Python web framework
@@ -74,6 +75,17 @@ result = webmetic_referrer(
 result = webmetic_referrer("https://site.com/")
 # Returns: {'source': '(direct)', 'medium': '(none)'}
 ```
+
+### Internal Navigation
+```python
+result = webmetic_referrer(
+    url="https://shop.example.com/products",
+    referrer="https://example.com/"
+)
+# Returns: {'source': '(internal)', 'medium': 'internal'}
+```
+
+The library automatically detects internal navigation between subdomains using advanced TLD parsing, correctly handling complex domains like `.co.uk`, `.com.au`, `.org.br`, etc.
 
 ## 🎯 Unified Click Tracking
 
