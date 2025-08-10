@@ -7,6 +7,24 @@ from typing import Dict, Optional, Any
 from .parameters import create_parameter_extractor
 from .referrers import create_referrer_parser
 
+# Module-level singleton instances for high-performance scenarios
+_referrer_parser = None
+_parameter_extractor = None
+
+def _get_referrer_parser():
+    """Get cached referrer parser instance (singleton pattern for performance)."""
+    global _referrer_parser
+    if _referrer_parser is None:
+        _referrer_parser = create_referrer_parser()
+    return _referrer_parser
+
+def _get_parameter_extractor():
+    """Get cached parameter extractor instance (singleton pattern for performance)."""
+    global _parameter_extractor
+    if _parameter_extractor is None:
+        _parameter_extractor = create_parameter_extractor()
+    return _parameter_extractor
+
 
 def parse_attribution(tracking_data: Dict[str, Any]) -> Dict[str, Optional[str]]:
     """
@@ -57,12 +75,12 @@ def parse_attribution(tracking_data: Dict[str, Any]) -> Dict[str, Optional[str]]
         base_url = ''
 
     # Extract URL parameters
-    param_extractor = create_parameter_extractor()
+    param_extractor = _get_parameter_extractor()
     extracted_params = param_extractor.extract_from_tracking_data(tracking_data)
     result.update(extracted_params)
 
     # Parse referrer information
-    referrer_parser = create_referrer_parser()
+    referrer_parser = _get_referrer_parser()
     referrer_info = referrer_parser.parse(referrer_url, base_url)
 
     # Add referrer analysis results with prefix to avoid conflicts

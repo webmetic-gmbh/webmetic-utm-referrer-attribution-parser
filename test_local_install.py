@@ -39,13 +39,15 @@ def test_basic_functionality():
         
         assert result['source'] == 'google'
         assert result['medium'] == 'cpc'
-        assert result['gclid'] == 'abc123'
+        assert result['click_id'] == 'abc123'
+        assert result['click_id_type'] == 'gclid'
         print("✅ Google Ads attribution working")
         
         # Test Facebook
         result = webmetic_referrer("https://mysite.com/?fbclid=fb123")
         assert result['source'] == 'facebook'
-        assert result['fbclid'] == 'fb123'
+        assert result['click_id'] == 'fb123'
+        assert result['click_id_type'] == 'fbclid'
         print("✅ Facebook attribution working")
         
         # Test organic search
