@@ -102,7 +102,7 @@ class TestReferrerParserCache:
         """Test parse result caching."""
         cache = ReferrerParserCache()
         
-        result = {"source": "Google", "medium": "search"}
+        result = {"source": "google", "medium": "organic"}
         
         cache.put_parse_result("cache_key", result)
         retrieved = cache.get_parse_result("cache_key")

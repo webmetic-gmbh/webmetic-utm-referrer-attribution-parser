@@ -43,8 +43,8 @@ class TestCoreAttribution:
             referrer="https://www.google.com/search?q=web+analytics+guide"
         )
         
-        assert result['source'] == 'Google'
-        assert result['medium'] == 'search'
+        assert result['source'] == 'google'
+        assert result['medium'] == 'organic'
         assert result['term'] == 'web analytics guide'
 
     def test_direct_traffic(self):
@@ -278,7 +278,7 @@ class TestRealWorldScenarios:
             referrer="https://www.facebook.com/some/post"
         )
         
-        assert result['source'] == 'Facebook'
+        assert result['source'] == 'facebook'
         assert result['medium'] == 'social'
 
     def test_newsletter_campaign_complete(self):

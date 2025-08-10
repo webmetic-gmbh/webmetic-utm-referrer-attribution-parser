@@ -47,8 +47,8 @@ class TestReferrerParser:
         
         result = self.parser.parse(referrer_url)
         
-        assert result['source'] == 'Google'
-        assert result['medium'] == 'search'
+        assert result['source'] == 'google'
+        assert result['medium'] == 'organic'
         assert result['term'] == 'web analytics guide'
     
     def test_google_search_no_term(self):
@@ -57,8 +57,8 @@ class TestReferrerParser:
         
         result = self.parser.parse(referrer_url)
         
-        assert result['source'] == 'Google'
-        assert result['medium'] == 'search'
+        assert result['source'] == 'google'
+        assert result['medium'] == 'organic'
         assert result['term'] is None
     
     def test_facebook_social(self):
@@ -67,7 +67,7 @@ class TestReferrerParser:
         
         result = self.parser.parse(referrer_url)
         
-        assert result['source'] == 'Facebook'
+        assert result['source'] == 'facebook'
         assert result['medium'] == 'social'
         assert result['term'] is None
     
@@ -77,8 +77,8 @@ class TestReferrerParser:
         
         result = self.parser.parse(referrer_url)
         
-        assert result['source'] == 'Bing'
-        assert result['medium'] == 'search'
+        assert result['source'] == 'bing'
+        assert result['medium'] == 'organic'
         assert result['term'] == 'python tutorial'
     
     def test_subdomain_matching(self):
@@ -87,7 +87,7 @@ class TestReferrerParser:
         
         result = self.parser.parse(referrer_url)
         
-        assert result['source'] == 'Facebook'
+        assert result['source'] == 'facebook'
         assert result['medium'] == 'social'
     
     def test_unknown_medium(self):
@@ -96,7 +96,7 @@ class TestReferrerParser:
         
         result = self.parser.parse(referrer_url)
         
-        assert result['source'] == 'Google Services'
+        assert result['source'] == 'google services'
         assert result['medium'] == 'unknown'
     
     def test_internal_referrer(self):
@@ -173,8 +173,8 @@ class TestReferrerParser:
         
         result = self.parser.parse(referrer_url)
         
-        assert result['source'] == 'Google'
-        assert result['medium'] == 'search'
+        assert result['source'] == 'google'
+        assert result['medium'] == 'organic'
         assert result['term'] is None
     
     def test_domain_path_matching(self):
@@ -194,5 +194,5 @@ class TestReferrerParser:
         result = parser.parse(referrer_url)
         
         # Should match the more specific path-based entry
-        assert result['source'] == 'Google Images'
-        assert result['medium'] == 'search'
+        assert result['source'] == 'google images'
+        assert result['medium'] == 'organic'

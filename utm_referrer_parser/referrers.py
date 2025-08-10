@@ -97,10 +97,10 @@ class ReferrerParser:
                 cache.put_parse_result(cache_key, result)
                 return result
 
-            result['source'] = referrer_info['name']
-            result['medium'] = referrer_info['medium']
+            result['source'] = referrer_info['name'].lower()
+            result['medium'] = 'organic' if referrer_info['medium'] == 'search' else referrer_info['medium']
 
-            # Extract search term for search engines
+            # Extract search term for search engines (check original medium before mapping)
             if referrer_info['medium'] == 'search' and referrer_info['parameters']:
                 search_term = self._extract_search_term(ref_uri.query, referrer_info['parameters'])
                 if search_term:

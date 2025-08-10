@@ -107,7 +107,7 @@ def _determine_attribution(
 
     # If we have valid UTM parameters, use them
     if utm_source and utm_medium:
-        attribution['source'] = utm_source
+        attribution['source'] = utm_source.lower()
         attribution['medium'] = utm_medium
         attribution['term'] = url_params.get('utm_term')
         return attribution
@@ -117,13 +117,13 @@ def _determine_attribution(
         click_id_attribution = _infer_from_click_ids(url_params)
         if click_id_attribution['source']:
             # Use UTM source but infer medium from click ID
-            attribution['source'] = utm_source
+            attribution['source'] = utm_source.lower()
             attribution['medium'] = click_id_attribution['medium']
             attribution['term'] = url_params.get('utm_term')
             return attribution
         else:
             # No click ID, default to (none) for medium
-            attribution['source'] = utm_source
+            attribution['source'] = utm_source.lower()
             attribution['medium'] = '(none)'
             attribution['term'] = url_params.get('utm_term')
             return attribution
@@ -148,7 +148,7 @@ def _determine_attribution(
     if click_id_attribution['source']:
         # Merge with any explicit UTM data
         if url_params.get('utm_source'):
-            attribution['source'] = url_params['utm_source']
+            attribution['source'] = url_params['utm_source'].lower()
         else:
             attribution['source'] = click_id_attribution['source']
 

@@ -67,7 +67,7 @@ def webmetic_referrer(
         ...     url="https://site.com/blog",
         ...     referrer="https://www.google.com/search?q=analytics"
         ... )
-        >>> print(result['source'])     # 'Google'
+        >>> print(result['source'])     # 'google'
         >>> print(result['term'])       # 'analytics'
         >>> print(result['click_id'])   # None
 

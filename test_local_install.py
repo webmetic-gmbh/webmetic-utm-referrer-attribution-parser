@@ -53,8 +53,8 @@ def test_basic_functionality():
             url="https://mysite.com/blog",
             referrer="https://www.google.com/search?q=analytics"
         )
-        assert result['source'] == 'Google'
-        assert result['medium'] == 'search'
+        assert result['source'] == 'google'
+        assert result['medium'] == 'organic'
         assert result['term'] == 'analytics'
         print("✅ Organic search attribution working")
         

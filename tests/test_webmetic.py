@@ -46,8 +46,8 @@ class TestWebmeticReferrer:
             referrer="https://www.google.com/search?q=web+analytics+guide"
         )
         
-        assert result['source'] == 'Google'
-        assert result['medium'] == 'search'
+        assert result['source'] == 'google'
+        assert result['medium'] == 'organic'
         assert result['term'] == 'web analytics guide'
     
     def test_direct_traffic(self):
@@ -225,6 +225,6 @@ class TestWebmeticReferrer:
         )
         
         # Should use referrer analysis
-        assert result['source'] == 'Google'
-        assert result['medium'] == 'search'
+        assert result['source'] == 'google'
+        assert result['medium'] == 'organic'
         assert result['term'] == 'python tutorial'

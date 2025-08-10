@@ -49,11 +49,11 @@ class TestParseAttribution:
         result = parse_attribution(tracking_data)
         
         # Should get referrer information
-        assert result['referrer_source'] == 'Google'
-        assert result['referrer_medium'] == 'search'
+        assert result['referrer_source'] == 'google'
+        assert result['referrer_medium'] == 'organic'
         assert result.get('referrer_term') == 'web analytics guide'
-        assert result['attribution_source'] == 'Google'
-        assert result['attribution_medium'] == 'search'
+        assert result['attribution_source'] == 'google'
+        assert result['attribution_medium'] == 'organic'
     
     def test_direct_traffic(self):
         """Test direct traffic attribution."""
@@ -86,8 +86,8 @@ class TestParseAttribution:
         assert result['utm_campaign'] == 'march2024'
         
         # But referrer info should still be available
-        assert result['referrer_source'] == 'Google'
-        assert result['referrer_medium'] == 'search'
+        assert result['referrer_source'] == 'google'
+        assert result['referrer_medium'] == 'organic'
     
     def test_multiple_click_ids(self):
         """Test handling of multiple click IDs."""
