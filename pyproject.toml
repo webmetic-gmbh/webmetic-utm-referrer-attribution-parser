@@ -4,13 +4,13 @@ build-backend = "hatchling.build"
 
 [project]
 name = "utm-referrer-attribution-parser"
-version = "0.1.2"
+version = "0.1.3"
 description = "Modern Python library combining referrer parsing with tracking parameter extraction for web analytics"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.8"
 authors = [
-    {name = "Webmetic", email = "info@webmetic.com"},
+    {name = "Webmetic", email = "support@webmetic.de"},
 ]
 keywords = ["utm", "referrer", "attribution", "analytics", "tracking"]
 classifiers = [
@@ -43,9 +43,10 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/webmetic/utm-referrer-attribution-parser"
+Homepage = "https://webmetic.de"
 Repository = "https://github.com/webmetic/utm-referrer-attribution-parser"
 Issues = "https://github.com/webmetic/utm-referrer-attribution-parser/issues"
+Website = "https://webmetic.de"
 
 [tool.hatch.build.targets.wheel]
 packages = ["utm_referrer_parser"]
