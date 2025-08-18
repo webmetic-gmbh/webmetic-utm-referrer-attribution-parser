@@ -27,6 +27,7 @@ GOOGLE_ADS_PARAMETERS = {
     'gbraid',     # Google Ads - Enhanced Conversions
     'wbraid',     # Google Ads - Web to App
     'gad_source', # Google Ads Source
+    'gad_campaignid', # Google Ads Campaign ID
     'srsltid'     # Google Shopping
 }
 

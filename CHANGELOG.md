@@ -2,7 +2,30 @@
 
 All notable changes to utm-referrer-attribution-parser will be documented in this file.
 
-## [0.1.3] - 2025-01-10
+## [0.1.4] - 2025-08-18
+
+### Added
+
+- Support for Google Ads Campaign ID extraction via `gad_campaignid` parameter
+- New `campaign_id` field in webmetic_referrer output for direct campaign ID access
+- Enhanced Google Ads tracking parameter support including `gad_campaignid`
+- Comprehensive test suite for modern advertising platform tracking parameters
+- Examples demonstrating Google Ads campaign tracking functionality
+
+### Enhanced
+
+- Improved Google Ads parameter tracking infrastructure
+- Extended click ID priority logic to handle modern Google Ads parameters
+- Enhanced documentation with campaign ID extraction examples
+
+### Technical Improvements
+
+- Added `gad_campaignid` to tracked Google Ads parameters
+- Updated webmetic output format to include dedicated `campaign_id` field
+- Maintained full backward compatibility with existing UTM parameter extraction
+- Added 17 new test cases covering Google Ads campaign tracking scenarios
+
+## [0.1.3] - 2025-08-10
 
 ### Changed
 
@@ -10,7 +33,7 @@ All notable changes to utm-referrer-attribution-parser will be documented in thi
 - Changed support email
 - Added webmetic.de website links to project metadata
 
-## [0.1.2] - 2025-01-10
+## [0.1.2] - 2025-08-05
 
 ### Added
 
@@ -39,7 +62,7 @@ All notable changes to utm-referrer-attribution-parser will be documented in thi
 - Added fallback logic for edge cases where tldextract might fail
 - Enhanced test coverage for international domain scenarios
 
-## [0.1.1] - 2024-12-XX
+## [0.1.1] - 2025-08-01
 
 ### Changed
 
@@ -47,7 +70,7 @@ All notable changes to utm-referrer-attribution-parser will be documented in thi
 - Fix UTM source casing inconsistency and standardize search medium
 - Implement unified click ID structure for cleaner API
 
-## [0.1.0] - 2024-12-XX
+## [0.1.0] - 2025-07-25
 
 ### Added
 

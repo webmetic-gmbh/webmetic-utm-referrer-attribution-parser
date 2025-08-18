@@ -30,6 +30,7 @@ def webmetic_referrer(
         - source: Final attributed source (e.g., 'google', 'facebook', '(direct)')
         - medium: Final attributed medium (e.g., 'cpc', 'organic', 'social')
         - campaign: Campaign name from UTM parameters
+        - campaign_id: Campaign ID from Google Ads (gad_campaignid)
         - term: Search term or UTM term
         - content: UTM content parameter
 
@@ -39,7 +40,7 @@ def webmetic_referrer(
         
         Other Tracking Parameters (only included if present):
         - All UTM parameters (utm_source, utm_medium, etc.)
-        - Google Ads metadata: gclsrc, gad_source, srsltid  
+        - Google Ads metadata: gclsrc, gad_source, gad_campaignid, srsltid  
         - Social Media: igshid, sccid
         - Email Marketing: mc_cid, mc_eid, ml_subscriber_hash
         - Other: epik, ttd_uuid, obOrigUrl, pk_campaign, etc.
@@ -136,6 +137,7 @@ def _format_webmetic_result(raw_result: Dict) -> Dict[str, Optional[str]]:
     result["source"] = raw_result.get("attribution_source")
     result["medium"] = raw_result.get("attribution_medium")
     result["campaign"] = raw_result.get("utm_campaign")
+    result["campaign_id"] = raw_result.get("gad_campaignid")  # Extract Google Ads Campaign ID
     result["term"] = (
         raw_result.get("attribution_term")
         or raw_result.get("utm_term")
@@ -167,7 +169,8 @@ def _format_webmetic_result(raw_result: Dict) -> Dict[str, Optional[str]]:
         "utm_id",
         # Google Ads metadata (not click IDs)
         "gclsrc",
-        "gad_source", 
+        "gad_source",
+        "gad_campaignid",
         "srsltid",
         # Social Media non-click parameters
         "igshid",
